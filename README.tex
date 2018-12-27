@@ -35,7 +35,7 @@
 }
 
 %opening
-\title{Algorithm for periodic quantum dynamics of a random Ising chain}
+\title{Algorithm for periodic quantum dynamics of a disordered fermion lattice.}
 \author{Analabha Roy}
 
 \begin{document}
@@ -44,162 +44,89 @@
 
 \section{\sc Introduction}
 \label{sec:intro}
-This algorithm integrates the dynamics of the following Ising model
+\textbf{Note:} For the original one-dimensional case from which these notes are taken and modified, see~\cite{myisingrand:suppl}.
+This algorithm integrates the dynamics of a fermion model of a 2-dimensional $L\times L$ square lattice. For the sake of counting convenience, we have chosen to flatten the lattice in $1d$ in row-major order. Thus, the Hamiltonian is
 \begin{equation} \label{H_OBC}
-H(t) = -  \frac{J}{2} \sum_i^{L-1}  \left(1+\alpha J_i\right) \left(c^{\dagger}_i c^{\dagger}_{i+1} + c^{\dagger}_i c_{i+1}  + {\rm h.c.}\right) 
-    -  \sum_i^{L} \bigg\{h(t)+\alpha h_i\bigg\} c^{\dagger}_i c_i \;,
+H(t) = -  \frac{J}{2} \sum_{i=0}^{L^2-1}   \bigg\{c^{\dagger}_i c^{\dagger}_{i+1} + c^{\dagger}_i c^{\;}_{i+1} + \gamma \left(c^{\dagger}_i c^{\dagger}_{i+L} + c^{\dagger}_i c^{\;}_{i+L}\right)  + {\rm h.c.}\bigg\} 
+    -  \sum_{i=0}^{L^2-1} \bigg\{h(t)+\alpha h_i\bigg\} c^{\dagger}_i c^{\;}_i \;,
 \end{equation}
-where $h(t)$ can be $h_0\cos{\omega t}$ or $h_0 \left(t/\tau\right)$ as in~\cite{isingrand}. The quantities $J_i$ and $h_i$ are random numbers, either uniform in the range $(-\sigma,\sigma)$, or Gaussian with a standard deviation of $\sigma$. The Hamiltonian can be written as a sum of the time-driven Ising Hamiltonian $ H_D(t)$ and a disordered Ising Hamiltonian whose contribution is controlled by a weak perturbative term $\alpha$. Thus,
+where $h(t)$ can be any periodic function, set to the default of $h_0\cos{\omega t}$. The quantities $h_i$ are random numbers, either uniform in the range $(-\sigma,\sigma)$, or Gaussian with a standard deviation of $\sigma$. The Hamiltonian can be written as a sum of the time-driven ordered Hamiltonian $ H_D(t)$ and a disordered Hamiltonian whose contribution is controlled by a weak perturbative term $\alpha$. Thus,
 \begin{eqnarray}
-H(t)&=& H_D(t)+\alpha H_R.
+H(t)&=& H_D(\gamma;t)+\alpha H_R.
 \end{eqnarray}
-The object is to do a general study of the model dynamics, and investigate the dynamics of an arbitrary initial state when $H_D(t)$ is at resonance and exotically freezes the unperturbed Hamiltonian~\cite{arnab1}. The full model can, via Jordan Wigner Transformation, be mapped to the dynamics below~\cite{isingrand}
+The object is to do a general study of the model dynamics, and investigate the dynamics of a localized initial state~\cite{arnab1}. We can write the Hamiltonian in eq~\ref{H_OBC} in terms of Nambu spinors $|Psi$:
+\begin{eqnarray}
+H(t) &=& \Psi^\dagger \bar{H}(t)\Psi,\nonumber\\
+\Psi &\equiv& \begin{pmatrix}
+c_0\\
+c_1\\
+\vdots\\
+c_{L^2-1}\\
+c^\dagger_0\\
+c^\dagger_1\\
+\vdots\\
+c^\dagger_{L^2-1}
+\end{pmatrix},\nonumber \\
+\bar{H}(t) &=&\begin{pmatrix}
+A(t) & B(t)\\
+-B(t) & A(t)
+\end{pmatrix}.
+\label{eq:nambu}
+\end{eqnarray}
+The submatrices $A(t)$ and $B(t)$ are real and of size $L^2\times L^2$. The matrix $A=A^d(t)+A^o$, where $A^d_{i,j}(t)=-\left[h(t)+\alpha h_i\right]\delta_{i,j}/2$ is diagonal. The
+non-zero elements of $A^o$ and $B$ are given by $A^o_{i,i+1}=A^o_{i+1,i}=-J/4, A^o_{i,i+L}=A^o_{i+L,i}=-J\gamma/4$, $B_{i,i+1}=-B_{i+1,i}=- J/4, B_{i,i+L}=-B_{i+L,i}=- J\gamma/4$.
+
+The Heisenberg quantum dynamics of the operator $c_{i,H}(t)$ are
+\begin{equation}
+\label{eq:heisenberg}
+i \frac{\mathrm{d}}{\mathrm{d} t}c^{\;}_{i,H}(t) = U^\dagger(t)\left[c_i,H(t)\right]U(t),
+\end{equation}
+where the subscript $H$ denotes operators in the Heisenberg picture, and  $U(t)$ is the time translation that solves the Schr\"odinger equation of the Hamiltonian in Eq.~\ref{H_OBC}. Note that, for every operator $O(t)$ in the Schr\"odinger picture, the corresponding operator in the Heisenberg picture, $O_H(t)=U^\dagger(t) O(t) U(t)$. We now substitute the last of Eq.~\ref{eq:nambu} into the rhs of Eq.~\ref{eq:heisenberg} to yield
+\begin{equation}
+\label{eq:dyn}
+i \frac{\mathrm{d}}{\mathrm{d} t}c^{\;}_{i,H}(t) =  2\sum_{j=0}^{L^2-1} \bigg[A_{ij}(t)c^{\;}_{j,H}(t)+ B_{ij}(t)c^{\dagger}_{i,H}(t)\bigg].
+\end{equation}
+These equations can be solved by the trial solution $c^{\;}_{i,H}(t) = \sum_{\mu=0}^{L^2-1} \left[u_{i\mu}(t)\gamma_{\mu,H}(t)+v^\ast_{i\mu}(t)\gamma^\dagger_{\mu,H}(t)\right]$, where the Bogoliubov ansatz makes the many body state $|\Psi(t)\rangle$ the emergent vacuum of the modes  created by $\gamma^\dagger_{\mu}(t)$ $\forall t$ \textit{viz.} $|\Psi(t)\rangle \sim \prod_{\mu=0}^{L^2-1} \gamma_\mu(t) |0\rangle$, where the normalization has been suppressed for brevity. A necessary and sufficient condition for the emergent modes to generate the emergent vacuum is that $\gamma_\nu(t)|\Psi(t)\rangle = 0$, leading to  $ {d\over dt} \left( \gamma_\nu(t)|\Psi(t)\rangle \right) = 0$. In the Heisenberg picture, this condition can be rewritten as $i{d\over dt}\gamma_{\mu,H}(t)=0$. Using this result, we substitute the trial solution into Eq.~\ref{eq:dyn} and compare operator coefficients. This leads to the following dynamical system~\cite{isingrand, myisingrand}
 \begin{empheq} [box=\fbox]{align}
 \label{BdG_tdep:eqn}
 i\frac{d}{dt}u_{i\mu}(t) &=  
-{2} \sum_{j=1}^{L} \left[A_{i,j}(t)u_{j\mu}(t)+B^o_{i,j}(t)v_{j\mu}(t) \right] 
+{2} \sum_{j=0}^{L^2-1} \left[A_{i,j}(t)u_{j\mu}(t)+B_{i,j}(t)v_{j\mu}(t) \right] 
 \nonumber \\
 i\frac{d}{dt}v_{i\mu}(t) \!\! &= 
--{2}\sum_{j=1}^{L} \left[A_{i,j}(t)v_{j\mu}(t)+B^o_{i,j}(t)u_{j\mu}(t) \right].
+-{2}\sum_{j=0}^{L^2-1} \left[A_{i,j}(t)v_{j\mu}(t)+B_{i,j}(t)u_{j\mu}(t) \right].
 \end{empheq}
-Here $A$ and $B^o$ are real $L\times L$ matrices. The matrix $A=A^d(t)+A^o$, where $A^d_{i,j}(t)=-\left[h(t)+\alpha h_i\right]\delta_{i,j}/2$ is diagonal. The
-non-zero elements of $A^o$ and $B^o$ are given by $A^o_{i,i+1}=A^o_{i+1,i}=-J (1+\alpha J_i) /4$, $B^o_{i,i+1}=-B^o_{i+1,i}=- J (1+\alpha J_i)/4$. Furthermore, the system state is characterized by two \textit{complex} $L\times L$ matrices $u$ and $v$, whose columns are the $L$-dimensional vectors $u_\mu$ and $v_\mu$ for $\mu=1,\dots,L$. Note that, for $\alpha=0.0$, the system is perfectly ordered and evolves in time as a driven Ising model along the lines of~\cite{arnab1}. However, there is a factor of $2$ difference in the amplitudes from~\cite{arnab1}. Thus, exotic freezing in our model occurs when the following resonance condition is met
-\begin{equation}
-\label{eq:freezing}
-\mathcal{J}_0(\eta)=0,
-\end{equation}
-for periodic driving with $h(t)=h_0 \cos{\omega t}$. Here, $\eta\equiv {2h_0}/{\omega}$, and $\mathcal{J}_0(x)$ is the zeroth order Bessel Function, and arises from the dominant term in the Fourier series expansion for $|\psi(t)\rangle = \exp{\left[-i\int^t_0 \mathrm{d}\tau\; H(\tau)\right]}|\psi(0)\rangle$ in the instantaneous rest frame of the drive signal~\cite{arnab1}.
+Here $A$ and $B^o$ are real $L^2\times L^2$ matrices.  Furthermore, the state of the system is characterized by two \textit{complex} $L^2\times L^2$ matrices $u$ and $v$, whose columns are the $L^2$-dimensional vectors $u_\mu$ and $v_\mu$ for $\mu=0,\dots,L^2-1$. Unitary evolution and canonicality demands that $\{\gamma_\mu(t),\gamma^\dagger_\nu(t)\}=\delta_{\mu\nu},\{\gamma_\mu(t),\gamma_\nu(t)\}=\{\gamma^\dagger_\mu(t),\gamma^\dagger_\nu(t)\}=0$. Thus, $u^\dagger(t) u(t) + v^\dagger(t) v(t) = \mathds{1}$, and $v^T(t)u(t)+u^T(t)v(t) = 0$.  Any initial condition we choose must satisfy these conditions at $t=0$. Our choice of initial condition is a typical state where each lattice site is occupied by one fermion. Thus,
+$|\Psi(0)\rangle \sim \prod_{i=0}^{L^2-1} c^\dagger_i |0\rangle$. This can be set by putting $u(0)=0$, $v(0)=\mathds{1}$.
 
-We now discuss setting the initial conditions. At $t=0$, we define the invertible transformation
-\begin{eqnarray}
-\label{eq:gammadef}
-\gamma_\mu &\equiv& \sum^L_{j=1} \left(u^\ast_{j\mu}c_j+v^\ast_{j\mu}c^\dagger_j\right), \nonumber \\
-c_i &=& \sum^L_{\mu=1} \left(u_{i\mu}\gamma_\mu+v^\ast_{i\mu}\gamma^\dagger_\mu\right),
-\end{eqnarray}
-such that the state is given by $|\psi(0)\rangle \sim \prod_\mu \gamma_\mu|0\rangle$. In general, the operator $\gamma_\nu$ annihilates this state, and so represents the vacuum of the $\gamma$ particles. The $u_{ij}$ and $v_{ij}$ can be chosen to diagonalize the Hamiltonian at $t=0$, in which case the $\gamma_\nu$s are Boglon quasiparticles. \textbf{In general, we are we are not doing so, although this is what was done in}~\cite{isingrand}. The dynamics in eqns~\ref{BdG_tdep:eqn} continues this transformation in time, thus
-\begin{equation}
-\label{eq:gammat}
-\gamma_\mu(t) \equiv \sum^L_{j=1} \bigg[u^\ast_{j\mu}(t)c_j+v^\ast_{j\mu}(t)c^\dagger_j\bigg].
-\end{equation}
-In the Schr\"odinger picture, the state of the system can be said to evolve as 
-\begin{eqnarray}
-\label{eq:psit}
-|\psi(t)\rangle  &=&   \frac{1}{\sqrt{n(t)}}\ \prod_i \gamma_i(t)|0\rangle,\nonumber \\
-n(t)           &\equiv&  \langle 0 |\prod_j \gamma^\dagger_j(t)\gamma_j(t)|0\rangle.
-\end{eqnarray}
-We now define the matrices $u(t)$ and $v(t)$ to encapsulate the coefficients $u_{\mu\nu}(t)$ and $v_{\mu\nu}(t)$. In addition, we go to the $SU(2L)$ representation and write the state of the system in terms of Nambu spinors in that space. Thus,
-\begin{equation}
-\label{eq:nambu:spinors}
-\begin{array}{lcrcr}
- \Psi \equiv \begin{bmatrix}
-            c_1\\
-            c_2 \\
-            \vdots \\
-            c_L\\
-            c^\dagger_1\\
-            c^\dagger_2 \\
-            \vdots\\
-            c^\dagger_L
-           \end{bmatrix} & , & \Gamma(t) \equiv \begin{bmatrix}
-            \gamma_1(t)\\
-            \gamma_2 (t)\\
-            \vdots \\
-            \gamma_L(t)\\
-            \gamma^\dagger_1(t)\\
-            \gamma^\dagger_2 (t)\\
-            \vdots\\
-            \gamma^\dagger_L(t)
-           \end{bmatrix} & . &
-           \end{array}
-\end{equation}
-The solution can be written in terms of these spinors as
-\begin{eqnarray}
-\label{eq:spinors}
-\Gamma(t) &   =  & U^\dagger(t) \Psi,\nonumber \\
-U(t)      &\equiv& \begin{bmatrix}         
-		    u(t) & v^\ast(t)\\
-		    v(t) & u^\ast(t)
-		    \end{bmatrix}.
-\end{eqnarray}
-In addition, the Hamiltonian
-\begin{eqnarray}
-\label{eq:hst}
-H(t)   &  =   & \Psi^\dagger H^S(t) \Psi,\nonumber \\
-H^S(t) &\equiv& \begin{bmatrix}
-                 A(t) & B(t)\\
-                 -B(t) & -A(t)
-                \end{bmatrix},
-\end{eqnarray}
-Unitary evolution and canonicality demands that $\{\gamma_\mu(t),\gamma^\dagger_\nu(t)\}=\delta_{\mu\nu},\{\gamma_\mu(t),\gamma_\nu(t)\}=\{\gamma^\dagger_\mu(t),\gamma^\dagger_\nu(t)\}=0$. Thus, from eqns~\ref{eq:gammat}, we get
-\begin{eqnarray}
-\label{eq:fermionicgamma}
-u^\dagger(t) u(t) + v^\dagger(t) v(t) &=& \mathds{1},\nonumber \\
-v^T(t)u(t)+u^T(t)v(t) &=& 0.
-\end{eqnarray}
-More generally, if we define the propagator matrices
-\begin{eqnarray}
-\alpha(t_1,t_2) &\equiv& v^T(t_1) \ u(t_2) + u^T(t_1) \ v(t_2),\nonumber \\
-\beta(t_1,t_2)  &\equiv& u^\dagger(t_1) \ u(t_2) + v^\dagger(t_1) \ v(t_2),
-\end{eqnarray}
-then $\alpha(t,t)=0$, $\beta(t,t)=\mathds{1}$ $\forall t$. We can use these propagator matrices to write down the basis transformation of $\gamma_\mu(t)$ from the elementary fermions $c_i,c^\dagger_i$ to the emergent fermions $\gamma_\mu,\gamma^\dagger_\mu$. Using eqs~\ref{eq:gammat} and~\ref{eq:gammadef}, this yields
-\begin{equation}
-\label{eq:emergentbasis}
-\gamma_\mu(t) = \beta^{\ }_{\mu\nu}(t,0) \ \gamma_\nu + \alpha^\ast_{\nu\mu}(0,t) \ \gamma^\dagger_\nu. 
-\end{equation}
-
-Finally, we discuss setting initial conditions. Any initial condition we choose must satisfy the conditions in eq~\ref{eq:fermionicgamma} at $t=0$. If we desire random initial conditions, one way is to keep $u=0$ and set $v$ to be a random unitary matrix. Random unitary matrices can be generated by creating a random matrix and performing Gram-Schmidt orthonormalization on its columns, effectively rotating the unit matrix by random angles. The GNU Scientific Library~\cite{galassi:gsl} contains routines for the QR decomposition of a matrix, where the matrix Q is unitary and  R is upper triangular. Building a random matrix, performing the QR decomposition and unpacking the matrix Q will yield the orthonormalized form of the random matrix. The relevant routines can be found in~\cite{gsl:qrdecomp}. However, this state does not appear to be sufficiently different from the classical ground state to be of much use, since the only randomness is in the phases. An alternative option is to start from the classical 
-ground state viz $|\psi(0)\rangle = \prod_i c^\dagger_i |0\rangle$. From 
-eq~\ref{eq:gammadef} and~\ref{eq:psit}, this can be done by setting $u(0)=0$,$v(0)=\mathds{1}$. Another choice is the Greenberger–Horne–Zeilinger (GHZ) state $|\psi(0)\rangle = \frac{1}{\sqrt{2}}\ \left(1+\prod_i c^\dagger_i\right)|0\rangle$. This can be set by setting  $h_0=0,\alpha= J_i=h_i=1$ in the Hamiltonian in eq~\ref{H_OBC} and diagonalizing it. The ground state of the ordered Ising model is $2$-fold degenerate, and numerical diagonalization routines select the equal superposition of the canonical basis states in the degenerate subspace as the eigenstate. In this case, that is just the GHZ state. This is accomplished by formulating $H^S(0)$ using eq~\ref{eq:hst} with $h_0=0,\alpha= J_i=h_i=1$ and diagonalizing it. This involves solving for $L$ eigenvalues $\epsilon_\mu$ such that
-\begin{equation}
-H^S(0)|\phi_\mu\rangle  = \epsilon_\mu |\phi_\mu\rangle,
-\end{equation}
-with ground state energy of $-\sum_\mu \epsilon_\mu$. The structure of $H^S$ in eq~\ref{eq:hst} indicates that if the eigenvalue  $\epsilon_\mu$ has an eigenvector $|\phi_\mu\rangle$, then the  eigenvalue  $-\epsilon_\mu$ has an eigenvector $|\phi^\ast_\mu\rangle$, where
-\begin{eqnarray}
-|\phi_\mu \rangle &=& \begin{pmatrix}
-        u_\mu \\
-	v_\mu
-       \end{pmatrix},\nonumber \\
-|\phi^\ast_\mu \rangle &=& \begin{pmatrix}
-        v^\ast_\mu \\
-	u^\ast_\mu
-       \end{pmatrix}.
-\end{eqnarray}
-Here, $u_\mu$, $v_\mu$ are $L-$ dimensional vectors that form the columns of the matrices $u(0)$ and $v(0)$ respectively. Thus, the matrix $U_d$ that diagonalizes $H^S (0)$ can be constructed as
-\begin{equation}
-U_d = \begin{bmatrix}
-       u(0) & v^\ast(0)\\
-       v(0) & u^\ast(0)
-      \end{bmatrix}.
-\end{equation}
-Thus, once $U_d$ is obtained numerically, the submatrices $u(0)$ and $v(0)$ can be extracted.
+Note that, for $\alpha=0.0$, the system is perfectly ordered and evolves in time as a driven fermion model along the lines of~\cite{arnab1}. 
 
 \section{Calculation of Dynamical Responses to the Drive}
 \label{sec:responses}
-We shall now use these results to obtain expressions for the measurable responses of the system as it evolves in time, namely the magnetization (mapped to the Fermion density after the Jordan Wigner Transformation), and the autocorrelations of the system. 
+We shall now use these results to obtain expressions for the measurable responses of the system as it evolves in time, namely the  Fermion density, and the autocorrelations of the system. 
 
-\subsection{Magnetization}
+\subsection{Fermion Density}
 \label{subsec:magcalc}
-The magnetization per site can be shown via Jordan Wigner transformation~\cite{arnab1} to be
+The fermion density is~\cite{arnab1} 
 \begin{equation}
 \label{eq:magdef}
-m(t)\equiv -1 + \frac{2}{L}\sum^L_{i=1} \langle \psi(0) | c^\dagger_{i,H} (t) c_{i,H}(t) |\psi(0)\rangle,
+\rho_f(t)\equiv  \frac{1}{L^2}\sum^{L^2-1}_{i=0} \langle \psi(0) | c^\dagger_{i,H} (t) c_{i,H}(t) |\psi(0)\rangle,
 \end{equation}
 where the operators 
 \begin{equation}
 \label{eq:cit}
-c_{i,H}(t)\equiv \sum^L_{\mu=1} \left[u_{i\mu}(t)\gamma_\mu+v^\ast_{i\mu}(t)\gamma^\dagger_\mu\right],
+c_{i,H}(t)\equiv \sum^{L^2-1}_{\mu=0} \left[u_{i\mu}(t)\gamma_\mu+v^\ast_{i\mu}(t)\gamma^\dagger_\mu\right],
 \end{equation}
 are in the Heisenberg picture, and $|\psi(0)\rangle$ is the initial state at $t=0$. Note that the number operator is NOT conserved by the Hamiltonian in eq~\ref{H_OBC}. Equation~\ref{eq:magdef} can be expanded using eq~\ref{eq:cit} to yield
 \begin{eqnarray}
 \label{eq:magops}
- m(t) &=& -1+2\langle\psi(0)|\hat{\rho}(t)|\psi(0)\rangle,\nonumber \\
- \hat{\rho}(t) &=& \frac{1}{L}\sum^L_{i,\mu,\nu = 1}\bigg[u^\ast_{i\nu}(t) u_{i\mu}(t)\gamma^\dagger_\nu\gamma_\mu + u^\ast_{i\nu}(t)v^\ast_{i\mu}(t)\gamma^\dagger_\nu\gamma^\dagger_\mu + \nonumber \\
+ \rho_f(t) &=& \langle\psi(0)|\hat{\rho}(t)|\psi(0)\rangle,\nonumber \\
+ \hat{\rho}(t) &=& \frac{1}{L^2}\sum^{L^2-1}_{i,\mu,\nu = 0}\bigg[u^\ast_{i\nu}(t) u_{i\mu}(t)\gamma^\dagger_\nu\gamma_\mu + u^\ast_{i\nu}(t)v^\ast_{i\mu}(t)\gamma^\dagger_\nu\gamma^\dagger_\mu + \nonumber \\
   & & v_{i\nu}(t)u_{i\mu}(t)\gamma_\nu\gamma_\mu + v_{i\nu}(t)v^\ast_{i\mu}(t)\gamma_\nu\gamma^\dagger_\mu\bigg] .
 \end{eqnarray}
 The expression for $\hat{\rho}(t)$ can be written as
 \begin{equation}
  \label{m:t}
- \hat{\rho}(t) = \frac{1}{L} \times \rm{Tr}\left[\hat{\kappa^i} \; u^\dagger(t)u(t) + \hat{\kappa^c} \; v^\dagger(t)v(t) + \hat{\epsilon^i} \; u^\dagger(t)v^\ast(t)+\hat{\epsilon^c} \; v^{\ast \dagger}(t)u(t)\right],
+ \hat{\rho}(t) = \frac{1}{L^2} \times \rm{Tr}\left[\hat{\kappa^i} \; u^\dagger(t)u(t) + \hat{\kappa^c} \; v^\dagger(t)v(t) + \hat{\epsilon^i} \; u^\dagger(t)v^\ast(t)+\hat{\epsilon^c} \; v^{\ast \dagger}(t)u(t)\right],
 \end{equation}
 where the matrix elements of $\hat{\rho^{i,c}}$ and $\hat{\epsilon^{i,c}}$ are
 \begin{eqnarray}
@@ -211,12 +138,12 @@ where the matrix elements of $\hat{\rho^{i,c}}$ and $\hat{\epsilon^{i,c}}$ are
 \end{eqnarray}
 Now, note that, all but the third equation among these are normal ordered. Also, since $\gamma_\mu$ ($\gamma^\dagger_\mu$) destroys $|\psi(0)\rangle$ ($\langle\psi(0)|$), all but $\hat{\kappa^c}_{\nu\mu}$ among the operators in eqs.~\ref{matelems} have zero expectation values w.r.t $|\psi(0)\rangle$. This allows for the simplification of eq~\ref{m:t} and then eq~\ref{eq:magops}, yielding
 \begin{equation}
-m(t) = -1+\frac{2}{L} \times {\rm Tr}\left[\langle\kappa^c\rangle {v}^\dagger(t) {v}(t)\right],
+\rho_f(t) = \frac{1}{L^2} \times {\rm Tr}\left[\langle\kappa^c\rangle {v}^\dagger(t) {v}(t)\right],
 \end{equation}
-where the expectation $\langle\dots\rangle\equiv \langle\psi(0)|\dots|\psi(0)\rangle$. Now, noting that the fermionic nature of the $\gamma$s (detailed in eqns~\ref{eq:fermionicgamma}) demands that $\hat{\kappa^c}_{\nu\mu}\equiv\gamma_\nu\gamma^\dagger_\mu=\delta_{\nu\mu}-\gamma^\dagger_\nu\gamma_\mu$, and taking expectation on both sides yields $\langle\kappa^c\rangle=\mathds{1}$. This gives us the working formula for the magnetization
+where the expectation $\langle\dots\rangle\equiv \langle\psi(0)|\dots|\psi(0)\rangle$. Now, noting that the fermionic nature of the $\gamma$s  demands that $\hat{\kappa^c}_{\nu\mu}\equiv\gamma_\nu\gamma^\dagger_\mu=\delta_{\nu\mu}-\gamma^\dagger_\nu\gamma_\mu$, and taking expectation on both sides yields $\langle\kappa^c\rangle=\mathds{1}$. This gives us the working formula for the fermion density
 \begin{equation}
  \label{eq:mag}
-\boxed{m(t) = -1+\frac{2}{L} \times {\rm Tr}\left[ {v}^\dagger(t) {v}(t)\right].}
+\boxed{\rho_f(t) = \frac{1}{L^2} \times {\rm Tr}\left[ {v}^\dagger(t) {v}(t)\right].}
 \end{equation}
 
 \section{\sc Notes on Algorithm}
@@ -275,6 +202,10 @@ The 'scripts' directory also contains some python scripts to postprocess the dat
 \end{itemize}
 
 \begin{thebibliography}{10}
+\bibitem{myisingrand}
+\newblock A. Roy and A. Das, Phys. Rev. B {\bf 91}, 121106(R), (2015).
+\bibitem{myisingrand:suppl}
+See Supplemental Material of~\cite{myisingrand}.
 \bibitem{isingrand}
 \newblock T. Caneva, R. Fazio, and G.E. Santoro, Phys. Rev. B {\bf 76}, 144427 (2007).
 \newblock DOI : \url{http://link.aps.org/doi/10.1103/PhysRevB.76.144427}.

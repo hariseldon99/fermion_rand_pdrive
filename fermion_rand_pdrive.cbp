@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="fermion_rand_pdrive" />
+		<Option makefile_is_custom="1" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Release">
+				<Option output="bin/Release/fermion_rand_pdrive" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+		</Compiler>
+		<Unit filename="cantor_pair.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="cantor_pair.h" />
+		<Unit filename="gsl_determinant_complex.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="gsl_determinant_complex.h" />
+		<Unit filename="initconds.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="initconds.h" />
+		<Unit filename="integrator_isingrand.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="integrator_isingrand.h" />
+		<Unit filename="isingrand_parallel.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="isingrand_parallel.h" />
+		<Unit filename="params.h" />
+		<Unit filename="responses.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="responses.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>
